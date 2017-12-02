@@ -1,0 +1,15 @@
+﻿{
+  "gateways": [
+    {
+      "mac": "00:00:00:00:00:00",
+      "password": "****************",
+      "devices": [
+        {
+          "model": "lumi.ctrl_86plug.v1",
+          "did": "lumi.00000000000000",
+          "name": "<friendly name>"
+        }
+      ]
+    }
+  ]
+}
