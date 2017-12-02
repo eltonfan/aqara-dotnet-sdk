@@ -36,7 +36,7 @@ namespace Elton.Aqara
             set { name = value; }
         }
 
-        public string ModelName => modelName;
+        public DeviceModel Model => model;
 
         public string Description
         {
@@ -52,11 +52,11 @@ namespace Elton.Aqara
         }
 
         string name = null;
-        string modelName = null;
+        DeviceModel model = null;
         string description = null;
         public void Update(string modelName, long short_id)
         {
-            this.modelName = modelName;
+            this.model = DeviceModel.Parse(modelName);
             if (short_id > UInt16.MaxValue)
                 throw new ArgumentOutOfRangeException("short_id 值比 UInt16 大。");
             ShortId = (UInt16)short_id;

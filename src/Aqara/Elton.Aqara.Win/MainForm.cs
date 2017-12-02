@@ -43,7 +43,7 @@ namespace Elton.Aqara.Win
 
             var column = new DataColumn() { Unique = true };
             table.Columns.Add("sid", typeof(string));
-            table.Columns.Add("short_id", typeof(long));
+            table.Columns.Add("short_id", typeof(string));
             table.Columns.Add("name", typeof(string));
             table.Columns.Add("model", typeof(string));
             table.Columns.Add("data", typeof(string));
@@ -54,23 +54,23 @@ namespace Elton.Aqara.Win
             dataGridView1.DataSource = table;
         }
 
-        void AddOrUpdate(string sid, string name, string model, long short_id, string data, DateTime timestamp)
+        void AddOrUpdate(string sid, string name, DeviceModel model, long short_id, string data, DateTime timestamp)
         {
             if (table.Rows.Contains(sid))
             {
                 var row = table.Rows.Find(sid);
 
                 //row["sid"]
-                row["short_id"] = short_id;
+                row["short_id"] = short_id.ToString("X4");
                 row["name"] = name;
-                row["model"] = model;
+                row["model"] = model?.ToString();
                 row["data"] = data;
                 row["timestamp"] = $"{DateTime.Now.Subtract(timestamp).TotalSeconds:0}s";
                 row["DateUpdated"] = timestamp;
             }
             else
             {
-                table.Rows.Add(sid, short_id, name, model, data, "刚刚", timestamp);
+                table.Rows.Add(sid, short_id.ToString("X4"), name, model?.ToString(), data, "刚刚", timestamp);
             }
         }
 
@@ -93,7 +93,12 @@ namespace Elton.Aqara.Win
 
                 foreach(var device in gateway.Devices.Values)
                 {
-                    AddOrUpdate(device.Id, device.Name, device.ModelName, device.ShortId, null, device.LatestTimestamp);
+                    var sb = new StringBuilder();
+                    foreach(var pair in device.States)
+                    {
+                        sb.Append($"{pair.Key}:{pair.Value.Value} ");
+                    }
+                    AddOrUpdate(device.Id, device.Name, device.Model, device.ShortId, sb.ToString(), device.LatestTimestamp);
                 }
             }
         }

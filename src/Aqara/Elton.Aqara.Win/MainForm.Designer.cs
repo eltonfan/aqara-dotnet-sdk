@@ -33,14 +33,15 @@
             this.labelTimestamp = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.labelToken = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
             this.columnId = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnModel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnShortId = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnData = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnTimestamp = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.labelToken = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
+            this.columnDateUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -92,7 +93,6 @@
             this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dataGridView1.ColumnHeadersHeight = 32;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
@@ -102,7 +102,8 @@
             this.columnName,
             this.columnShortId,
             this.columnData,
-            this.columnTimestamp});
+            this.columnTimestamp,
+            this.columnDateUpdated});
             this.dataGridView1.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dataGridView1.Location = new System.Drawing.Point(12, 90);
             this.dataGridView1.Name = "dataGridView1";
@@ -111,48 +112,6 @@
             this.dataGridView1.ShowEditingIcon = false;
             this.dataGridView1.Size = new System.Drawing.Size(1760, 859);
             this.dataGridView1.TabIndex = 4;
-            // 
-            // columnId
-            // 
-            this.columnId.DataPropertyName = "sid";
-            this.columnId.HeaderText = "ID";
-            this.columnId.Name = "columnId";
-            this.columnId.ReadOnly = true;
-            // 
-            // columnModel
-            // 
-            this.columnModel.DataPropertyName = "model";
-            this.columnModel.HeaderText = "Model";
-            this.columnModel.Name = "columnModel";
-            this.columnModel.ReadOnly = true;
-            // 
-            // columnName
-            // 
-            this.columnName.DataPropertyName = "name";
-            this.columnName.HeaderText = "Name";
-            this.columnName.Name = "columnName";
-            this.columnName.ReadOnly = true;
-            // 
-            // columnShortId
-            // 
-            this.columnShortId.DataPropertyName = "short_id";
-            this.columnShortId.HeaderText = "ShortId";
-            this.columnShortId.Name = "columnShortId";
-            this.columnShortId.ReadOnly = true;
-            // 
-            // columnData
-            // 
-            this.columnData.DataPropertyName = "data";
-            this.columnData.HeaderText = "Data";
-            this.columnData.Name = "columnData";
-            this.columnData.ReadOnly = true;
-            // 
-            // columnTimestamp
-            // 
-            this.columnTimestamp.DataPropertyName = "timestamp";
-            this.columnTimestamp.HeaderText = "Timestamp";
-            this.columnTimestamp.Name = "columnTimestamp";
-            this.columnTimestamp.ReadOnly = true;
             // 
             // labelToken
             // 
@@ -173,6 +132,72 @@
             this.label4.TabIndex = 5;
             this.label4.Text = "令牌";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // columnId
+            // 
+            this.columnId.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.columnId.DataPropertyName = "sid";
+            this.columnId.FillWeight = 83.45177F;
+            this.columnId.HeaderText = "ID";
+            this.columnId.Name = "columnId";
+            this.columnId.ReadOnly = true;
+            this.columnId.Width = 48;
+            // 
+            // columnModel
+            // 
+            this.columnModel.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.columnModel.DataPropertyName = "model";
+            this.columnModel.FillWeight = 93.03745F;
+            this.columnModel.HeaderText = "Model";
+            this.columnModel.Name = "columnModel";
+            this.columnModel.ReadOnly = true;
+            this.columnModel.Width = 73;
+            // 
+            // columnName
+            // 
+            this.columnName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.columnName.DataPropertyName = "name";
+            this.columnName.FillWeight = 198.4799F;
+            this.columnName.HeaderText = "Name";
+            this.columnName.Name = "columnName";
+            this.columnName.ReadOnly = true;
+            this.columnName.Width = 70;
+            // 
+            // columnShortId
+            // 
+            this.columnShortId.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.columnShortId.DataPropertyName = "short_id";
+            this.columnShortId.FillWeight = 182.7411F;
+            this.columnShortId.HeaderText = "ShortId";
+            this.columnShortId.Name = "columnShortId";
+            this.columnShortId.ReadOnly = true;
+            this.columnShortId.Width = 79;
+            // 
+            // columnData
+            // 
+            this.columnData.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.columnData.DataPropertyName = "data";
+            this.columnData.FillWeight = 21.14487F;
+            this.columnData.HeaderText = "Data";
+            this.columnData.Name = "columnData";
+            this.columnData.ReadOnly = true;
+            // 
+            // columnTimestamp
+            // 
+            this.columnTimestamp.DataPropertyName = "timestamp";
+            this.columnTimestamp.FillWeight = 21.14487F;
+            this.columnTimestamp.HeaderText = "Timestamp";
+            this.columnTimestamp.Name = "columnTimestamp";
+            this.columnTimestamp.ReadOnly = true;
+            this.columnTimestamp.Width = 200;
+            // 
+            // columnDateUpdated
+            // 
+            this.columnDateUpdated.DataPropertyName = "DateUpdated";
+            this.columnDateUpdated.HeaderText = "DateUpdated";
+            this.columnDateUpdated.Name = "columnDateUpdated";
+            this.columnDateUpdated.ReadOnly = true;
+            this.columnDateUpdated.Visible = false;
             // 
             // MainForm
             // 
@@ -211,6 +236,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn columnShortId;
         private System.Windows.Forms.DataGridViewTextBoxColumn columnData;
         private System.Windows.Forms.DataGridViewTextBoxColumn columnTimestamp;
+        private System.Windows.Forms.DataGridViewTextBoxColumn columnDateUpdated;
     }
 }
 

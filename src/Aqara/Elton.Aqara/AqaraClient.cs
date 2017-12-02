@@ -139,7 +139,7 @@ namespace Elton.Aqara
 
             dynamic message = new {
                 cmd = "write",
-                model = device.ModelName,
+                model = device.Model?.Name,
                 sid = device.Id,
                 short_id = device.ShortId,
                 data = dataString,

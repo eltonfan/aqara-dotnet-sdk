@@ -153,19 +153,17 @@ namespace Elton.Aqara
             device.Update(model, short_id);
 
             dynamic data = JsonConvert.DeserializeObject(jsonString);
-            Dictionary<string, string> dicArguments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (var item in data)
             {
                 string key = item.Name;
                 string value = item.Value;
 
-                if (dicArguments.ContainsKey(key))
-                    dicArguments[key] = value;
-                else
-                    dicArguments.Add(key, value);
-            }
+                if(!device.States.ContainsKey(key))
+                    device.States.Add(key, new DeviceState(key));
 
-            //base.OnDeviceEventReport(deviceId, "report", dicArguments, timestamp);
+                var state = device.States[key];
+                state.SetValue(value);
+            }
         }
 
         void ProcessMessage_ReadAck(AqaraGateway gateway, dynamic message, DateTime timestamp)
@@ -225,7 +223,7 @@ namespace Elton.Aqara
                     break;
             }
 
-            log.Info($"GATEWAY[{device.Gateway.Id}] device updated: sid='{device.Id}' model='{device.ModelName}' shortId='{device.ShortId}'.");
+            log.Info($"GATEWAY[{device.Gateway.Id}] device updated: sid='{device.Id}' model='{device.Model}' shortId='{device.ShortId}'.");
 
             dynamic data = JsonConvert.DeserializeObject(jsonString);
             foreach (var item in data)
