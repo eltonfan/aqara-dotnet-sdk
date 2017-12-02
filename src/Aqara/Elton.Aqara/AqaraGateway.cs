@@ -12,7 +12,7 @@ namespace Elton.Aqara
     /// </summary>
     public class AqaraGateway
     {
-        static readonly Common.Logging.ILog log = Common.Logging.LogManager.GetLogger(typeof(AqaraConnector));
+        static readonly Common.Logging.ILog log = Common.Logging.LogManager.GetLogger(typeof(AqaraClient));
 
         const int REMOTE_PORT = 9898;
 

@@ -11,27 +11,29 @@ using System.Threading.Tasks;
 
 namespace Elton.Aqara
 {
-    public partial class AqaraConnector
+    public partial class AqaraClient
     {
-        static readonly Common.Logging.ILog log = Common.Logging.LogManager.GetLogger(typeof(AqaraConnector));
+        static readonly Common.Logging.ILog log = Common.Logging.LogManager.GetLogger(typeof(AqaraClient));
 
-        const string MULTICAST_ADDRESS = "224.0.0.50";
-        const int DISCOVERY_PORT = 4321;
         const int LOCAL_PORT = 9898;
-        readonly Dictionary<string, Guid> dicIds = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
-        readonly Dictionary<string, AqaraGateway> dicGateways = new Dictionary<string, AqaraGateway>(StringComparer.OrdinalIgnoreCase);
         readonly Encoding encoding = Encoding.UTF8;
-        public Guid Id { get; private set; }
-        protected readonly Dictionary<Guid, AqaraDevice> dicDevices = new Dictionary<Guid, AqaraDevice>();
-        public AqaraConnector(Guid id)
-        { }
+        readonly Dictionary<string, AqaraGateway> dicGateways = null;
+        protected readonly Dictionary<string, AqaraDevice> dicDevices = new Dictionary<string, AqaraDevice>(StringComparer.OrdinalIgnoreCase);
+        public AqaraClient(AqaraConfig config)
+        {
+            dicGateways = new Dictionary<string, AqaraGateway>(StringComparer.OrdinalIgnoreCase);
+            if (config.Gateways != null)
+            {
+                foreach (var gateway in config.Gateways)
+                {
+                    if (dicGateways.ContainsKey(gateway.GatewayMacAddress))
+                        continue;
 
-        /// <summary>
-        /// AES-CBC 128 初始向量
-        /// </summary>
-        static readonly byte[] AES_KEY_IV = new byte[] {
-            0x17, 0x99, 0x6d, 0x09, 0x3d, 0x28, 0xdd, 0xb3, 0xba, 0x69, 0x5a, 0x2e, 0x6f, 0x58, 0x56, 0x2e
-        };
+                    AqaraGateway entry = new AqaraGateway(gateway.GatewayMacAddress, gateway.Password, gateway.Devices);
+                    dicGateways.Add(entry.Id, entry);
+                }
+            }
+        }
 
         /// <summary>
         /// AES-CBC 128 加密。
@@ -47,7 +49,7 @@ namespace Elton.Aqara
 
             using (var aes = Aes.Create())
             {
-                using (ICryptoTransform encryptor = aes.CreateEncryptor(keyBytes, AES_KEY_IV))
+                using (ICryptoTransform encryptor = aes.CreateEncryptor(keyBytes, Consts.AES_KEY_IV))
                 {
                     encryptedBytes = new byte[16];
                     int length = encryptor.TransformBlock(dataBytes, 0, dataBytes.Length, encryptedBytes, 0);
@@ -65,7 +67,7 @@ namespace Elton.Aqara
         UdpClient client = null;
         public void SendDiscover(UdpClient client)
         {
-            IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(MULTICAST_ADDRESS), DISCOVERY_PORT);
+            IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(Consts.MulticastAddress), Consts.DiscoveryPort);
 
             // {"cmd":"whois"}
             Byte[] buffer = encoding.GetBytes("{\"cmd\":\"whois\"}");
@@ -82,18 +84,6 @@ namespace Elton.Aqara
             this.client.SendAsync(data, data.Length, gateway.EndPoint);
         }
 
-        public void Initialize(AqaraConfig config)
-        {
-            dicGateways.Clear();
-            foreach(var gateway in config.Gateways)
-            {
-                if (dicGateways.ContainsKey(gateway.GatewayMacAddress))
-                    continue;
-
-                AqaraGateway entry = new AqaraGateway(gateway.GatewayMacAddress, gateway.Password, gateway.Devices);
-                dicGateways.Add(entry.Id, entry);
-            }
-        }
 
         bool cancellationPending = false;
         public bool CancellationPending => cancellationPending;
@@ -109,7 +99,7 @@ namespace Elton.Aqara
 
             client.Client.Bind(localEp);
 
-            client.JoinMulticastGroup(IPAddress.Parse(MULTICAST_ADDRESS), 50);
+            client.JoinMulticastGroup(IPAddress.Parse(Consts.MulticastAddress), 50);
 
             SendDiscover(client);
 
@@ -134,7 +124,7 @@ namespace Elton.Aqara
                 }
             }
 
-            client.DropMulticastGroup(IPAddress.Parse(MULTICAST_ADDRESS));
+            client.DropMulticastGroup(IPAddress.Parse(Consts.MulticastAddress));
 
             client.Dispose();
         }
@@ -149,7 +139,7 @@ namespace Elton.Aqara
             dynamic message = new {
                 cmd = "write",
                 model = device.ModelName,
-                sid = device.SystemId,
+                sid = device.Id,
                 short_id = device.ShortId,
                 data = dataString,
             };

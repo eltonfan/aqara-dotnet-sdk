@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Elton.Aqara
 {
-    partial class AqaraConnector
+    partial class AqaraClient
     {
         protected virtual void ProcessMessage(string jsonString, DateTime timestamp)
         {
@@ -63,22 +63,15 @@ namespace Elton.Aqara
             dynamic data = JsonConvert.DeserializeObject(jsonString);
             foreach (string sid in data)
             {
-                Guid deviceId;
-                if (dicIds.ContainsKey(sid))
-                    deviceId = dicIds[sid];
-                else
-                {
-                    deviceId = Guid.NewGuid();
-                    dicIds.Add(sid, deviceId);
-                }
+                var deviceId = sid;
                 
                 if(!dicDevices.ContainsKey(deviceId))
                 {
-                    AqaraDevice device = new AqaraDevice(this, deviceId, gateway, sid);
+                    AqaraDevice device = new AqaraDevice(this, gateway, sid);
                     dicDevices.Add(deviceId, device);
 
-                    log.InfoFormat("GATEWAY[{0}] device added: sid='{1}' deviceId='{2}'.",
-                        device.Gateway.Id, device.SystemId, device.IdString);
+                    log.InfoFormat("GATEWAY[{0}] device added: sid='{1}'.",
+                        device.Gateway.Id, device.Id);
                 }
 
                 SendCommand(gateway, string.Format("{{\"cmd\" : \"read\", \"sid\": \"{0}\"}}", sid));
@@ -115,10 +108,7 @@ namespace Elton.Aqara
             }
             else
             {//子设备心跳
-                if (!dicIds.ContainsKey(sid))
-                    return;
-                Guid deviceId = dicIds[sid];
-                if (!dicDevices.ContainsKey(deviceId))
+                if (!dicDevices.ContainsKey(sid))
                     return;
                 dynamic data = JsonConvert.DeserializeObject(jsonString);
                 foreach (var item in data)
@@ -140,9 +130,9 @@ namespace Elton.Aqara
             string token = message.token;
             string jsonString = message.data;
 
-            if (!dicIds.ContainsKey(sid))
+            if (!dicDevices.ContainsKey(sid))
                 return;
-            Guid deviceId = dicIds[sid];
+            var deviceId = sid;
 
             dynamic data = JsonConvert.DeserializeObject(jsonString);
             Dictionary<string, string> dicArguments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -170,9 +160,9 @@ namespace Elton.Aqara
             long short_id = message.short_id;
             string jsonString = message.data;
 
-            if (!dicIds.ContainsKey(sid))
+            if (!dicDevices.ContainsKey(sid))
                 return;
-            Guid deviceId = dicIds[sid];
+            var deviceId = sid;
             if (!dicDevices.ContainsKey(deviceId))
                 return;
 
@@ -188,7 +178,7 @@ namespace Elton.Aqara
                 case "plug"://智能插座
                     if (!(device is PlugDevice))
                     {
-                        device = new PlugDevice(this, device.Id, device.Gateway, device.SystemId);
+                        device = new PlugDevice(this, device.Gateway, device.Id);
                         dicDevices[deviceId] = device;
                         device.Update(model, short_id);
                     }
@@ -198,7 +188,7 @@ namespace Elton.Aqara
                 case "ctrl_neutral2"://单火开关双键
                     if (!(device is CtrlNeutral2Device))
                     {
-                        device = new CtrlNeutral2Device(this, device.Id, device.Gateway, device.SystemId);
+                        device = new CtrlNeutral2Device(this, device.Gateway, device.Id);
                         dicDevices[deviceId] = device;
                         device.Update(model, short_id);
                     }
@@ -216,8 +206,8 @@ namespace Elton.Aqara
                     break;
             }
 
-            log.InfoFormat("GATEWAY[{0}] device updated: sid='{1}' deviceId='{2}' model='{3}' shortId='{4}'.",
-                device.Gateway.Id, device.SystemId, device.IdString, device.ModelName, device.ShortId);
+            log.InfoFormat("GATEWAY[{0}] device updated: sid='{1}' model='{3}' shortId='{4}'.",
+                device.Gateway.Id, device.Id, device.ModelName, device.ShortId);
 
             dynamic data = JsonConvert.DeserializeObject(jsonString);
             foreach (var item in data)

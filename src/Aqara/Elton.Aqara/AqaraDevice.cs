@@ -8,27 +8,25 @@ namespace Elton.Aqara
 {
     public class AqaraDevice
     {
-        protected readonly AqaraConnector connector = null;
+        protected readonly AqaraClient connector = null;
         protected readonly AqaraGateway gateway = null;
 
         readonly Dictionary<string, DeviceState> dicStates = new Dictionary<string, DeviceState>(StringComparer.OrdinalIgnoreCase);
 
-        public string SystemId { get; private set; }
+        public string Id { get; private set; }
         public long ShortId { get; private set; }
-        readonly Guid id;
-        public AqaraDevice(AqaraConnector connector, Guid id, AqaraGateway gateway, string sid)
+        public AqaraDevice(AqaraClient connector, AqaraGateway gateway, string sid)
         {
-            this.id = id;
             this.connector = connector;
             this.gateway = gateway;
-            this.SystemId = sid;
+            this.Id = sid;
         }
 
         public string Name
         {
             get
             {
-                AqaraDeviceConfig config = gateway.GetDeviceInformation(this.SystemId);
+                AqaraDeviceConfig config = gateway.GetDeviceInformation(this.Id);
                 if (config == null)
                     return name;
 
@@ -43,7 +41,7 @@ namespace Elton.Aqara
         {
             get
             {
-                AqaraDeviceConfig config = gateway.GetDeviceInformation(this.SystemId);
+                AqaraDeviceConfig config = gateway.GetDeviceInformation(this.Id);
                 if (config == null)
                     return description;
 
@@ -73,9 +71,5 @@ namespace Elton.Aqara
         {
             get { return dicStates; }
         }
-
-        public Guid Id => id;
-
-        public string IdString => id.ToString("N").ToLower();
     }
 }

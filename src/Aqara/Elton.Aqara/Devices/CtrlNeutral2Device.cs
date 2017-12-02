@@ -8,8 +8,8 @@ namespace Elton.Aqara
 {
     public class CtrlNeutral2Device : AqaraDevice
     {
-        public CtrlNeutral2Device(AqaraConnector connector, Guid id, AqaraGateway gateway, string sid)
-            : base(connector, id, gateway, sid)
+        public CtrlNeutral2Device(AqaraClient connector, AqaraGateway gateway, string sid)
+            : base(connector, gateway, sid)
         {
         }
         
