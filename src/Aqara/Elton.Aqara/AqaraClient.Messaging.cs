@@ -10,23 +10,33 @@ namespace Elton.Aqara
 {
     partial class AqaraClient
     {
-        protected virtual void ProcessMessage(string jsonString, DateTime timestamp)
+        protected virtual void ProcessMessage(string remoteAddress, string jsonString, DateTime timestamp)
         {
+            AqaraGateway gateway = null;
+            foreach(var item in dicGateways.Values)
+            {
+                if(item?.EndPoint?.Address.ToString() == remoteAddress)
+                {
+                    gateway = item;
+                    break;
+                }
+            }
+            
             dynamic content = JsonConvert.DeserializeObject(jsonString);
 
             string cmd = content.cmd;
             switch (cmd)
             {
-                case "iam": ProcessMessage_IAM(content, timestamp); break;
-                case "get_id_list_ack": ProcessMessage_GetIdListAck(content, timestamp); break;
-                case "heartbeat": ProcessMessage_Heartbeat(content, timestamp); break;
-                case "report": ProcessMessage_Report(content, timestamp); break;
-                case "read_ack": ProcessMessage_ReadAck(content, timestamp); break;
+                case "iam": ProcessMessage_IAM(gateway, content, timestamp); break;
+                case "get_id_list_ack": ProcessMessage_GetIdListAck(gateway, content, timestamp); break;
+                case "heartbeat": ProcessMessage_Heartbeat(gateway, content, timestamp); break;
+                case "report": ProcessMessage_Report(gateway, content, timestamp); break;
+                case "read_ack": ProcessMessage_ReadAck(gateway, content, timestamp); break;
                 case "write_ack": break;
             }
         }
 
-        void ProcessMessage_IAM(dynamic message, DateTime timestamp)
+        void ProcessMessage_IAM(AqaraGateway gateway, dynamic message, DateTime timestamp)
         {
             string cmd = message.cmd;
             if (cmd != "iam")
@@ -36,16 +46,18 @@ namespace Elton.Aqara
             string model = message.model;
             string ip = message.ip;
 
+            if (gateway !=null && gateway?.Id != sid)
+                throw new Exception();
             if (!dicGateways.ContainsKey(sid))
                 return;
-            AqaraGateway gateway = dicGateways[sid];
+            gateway = dicGateways[sid];
             gateway.UpdateEndPoint(ip, port);
 
             //{"cmd" : "get_id_list"}
             SendCommand(gateway, "{\"cmd\" : \"get_id_list\"}");
         }
 
-        void ProcessMessage_GetIdListAck(dynamic message, DateTime timestamp)
+        void ProcessMessage_GetIdListAck(AqaraGateway gateway, dynamic message, DateTime timestamp)
         {
             string cmd = message.cmd;
             if (cmd != "get_id_list_ack")
@@ -54,9 +66,11 @@ namespace Elton.Aqara
             string token = message.token;
             string jsonString = message.data;
 
+            if (gateway != null && gateway?.Id != gateway_sid)
+                throw new Exception();
             if (!dicGateways.ContainsKey(gateway_sid))
                 return;
-            AqaraGateway gateway = dicGateways[gateway_sid];
+            gateway = dicGateways[gateway_sid];
             gateway.UpdateToken(token);
 
             List<string> list = new List<string>();
@@ -65,33 +79,34 @@ namespace Elton.Aqara
             {
                 var deviceId = sid;
                 
-                if(!dicDevices.ContainsKey(deviceId))
+                if(!gateway.Devices.ContainsKey(deviceId))
                 {
                     AqaraDevice device = new AqaraDevice(this, gateway, sid);
-                    dicDevices.Add(deviceId, device);
+                    gateway.Devices.Add(deviceId, device);
 
-                    log.InfoFormat("GATEWAY[{0}] device added: sid='{1}'.",
-                        device.Gateway.Id, device.Id);
+                    log.Info($"GATEWAY[{device.Gateway.Id}] device added: sid='{device.Id}'.");
                 }
 
                 SendCommand(gateway, string.Format("{{\"cmd\" : \"read\", \"sid\": \"{0}\"}}", sid));
             }
         }
 
-        void ProcessMessage_Heartbeat(dynamic message, DateTime timestamp)
+        void ProcessMessage_Heartbeat(AqaraGateway gateway, dynamic message, DateTime timestamp)
         {
             string cmd = message.cmd;
             if (cmd != "heartbeat")
                 return;
             string sid = message.sid;
             string model = message.model;
-            string short_id = message.short_id;
+            long short_id = message.short_id;
             string jsonString = message.data;
             if (model == "gateway")
             {
+                if (gateway != null && gateway?.Id != sid)
+                    throw new Exception();
                 if (!dicGateways.ContainsKey(sid))
                     return;//如果没有配置密钥，则无需理会
-                AqaraGateway gateway = dicGateways[sid];
+                gateway = dicGateways[sid];
 
                 string token = message.token;
                 string ip = null;
@@ -108,8 +123,10 @@ namespace Elton.Aqara
             }
             else
             {//子设备心跳
-                if (!dicDevices.ContainsKey(sid))
+                if (!gateway.Devices.ContainsKey(sid))
                     return;
+                var device = gateway.Devices[sid];
+                device.Update(model, short_id);
                 dynamic data = JsonConvert.DeserializeObject(jsonString);
                 foreach (var item in data)
                 {
@@ -119,20 +136,21 @@ namespace Elton.Aqara
             }
         }
 
-        void ProcessMessage_Report(dynamic message, DateTime timestamp)
+        void ProcessMessage_Report(AqaraGateway gateway, dynamic message, DateTime timestamp)
         {
             string cmd = message.cmd;
             if (cmd != "report")
                 return;
             string sid = message.sid;
             string model = message.model;
-            string short_id = message.short_id;
+            long short_id = message.short_id;
             string token = message.token;
             string jsonString = message.data;
 
-            if (!dicDevices.ContainsKey(sid))
+            if (!gateway.Devices.ContainsKey(sid))
                 return;
-            var deviceId = sid;
+            var device = gateway.Devices[sid];
+            device.Update(model, short_id);
 
             dynamic data = JsonConvert.DeserializeObject(jsonString);
             Dictionary<string, string> dicArguments = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -150,7 +168,7 @@ namespace Elton.Aqara
             //base.OnDeviceEventReport(deviceId, "report", dicArguments, timestamp);
         }
 
-        void ProcessMessage_ReadAck(dynamic message, DateTime timestamp)
+        void ProcessMessage_ReadAck(AqaraGateway gateway, dynamic message, DateTime timestamp)
         {
             string cmd = message.cmd;
             if (cmd != "read_ack")
@@ -160,13 +178,14 @@ namespace Elton.Aqara
             long short_id = message.short_id;
             string jsonString = message.data;
 
-            if (!dicDevices.ContainsKey(sid))
+            if (!gateway.Devices.ContainsKey(sid))
                 return;
             var deviceId = sid;
-            if (!dicDevices.ContainsKey(deviceId))
+            if (!gateway.Devices.ContainsKey(deviceId))
                 return;
 
-            AqaraDevice device = dicDevices[deviceId] as AqaraDevice;
+            AqaraDevice device = gateway.Devices[deviceId] as AqaraDevice;
+            device.Update(model, short_id);
             switch (model)
             {
                 case "magnet"://a.窗磁传感器
@@ -179,7 +198,7 @@ namespace Elton.Aqara
                     if (!(device is PlugDevice))
                     {
                         device = new PlugDevice(this, device.Gateway, device.Id);
-                        dicDevices[deviceId] = device;
+                        gateway.Devices[deviceId] = device;
                         device.Update(model, short_id);
                     }
                     break;
@@ -189,7 +208,7 @@ namespace Elton.Aqara
                     if (!(device is CtrlNeutral2Device))
                     {
                         device = new CtrlNeutral2Device(this, device.Gateway, device.Id);
-                        dicDevices[deviceId] = device;
+                        gateway.Devices[deviceId] = device;
                         device.Update(model, short_id);
                     }
                     break;
@@ -206,8 +225,7 @@ namespace Elton.Aqara
                     break;
             }
 
-            log.InfoFormat("GATEWAY[{0}] device updated: sid='{1}' model='{3}' shortId='{4}'.",
-                device.Gateway.Id, device.Id, device.ModelName, device.ShortId);
+            log.Info($"GATEWAY[{device.Gateway.Id}] device updated: sid='{device.Id}' model='{device.ModelName}' shortId='{device.ShortId}'.");
 
             dynamic data = JsonConvert.DeserializeObject(jsonString);
             foreach (var item in data)

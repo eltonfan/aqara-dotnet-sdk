@@ -18,7 +18,6 @@ namespace Elton.Aqara
         const int LOCAL_PORT = 9898;
         readonly Encoding encoding = Encoding.UTF8;
         readonly Dictionary<string, AqaraGateway> dicGateways = null;
-        protected readonly Dictionary<string, AqaraDevice> dicDevices = new Dictionary<string, AqaraDevice>(StringComparer.OrdinalIgnoreCase);
         public AqaraClient(AqaraConfig config)
         {
             dicGateways = new Dictionary<string, AqaraGateway>(StringComparer.OrdinalIgnoreCase);
@@ -26,10 +25,11 @@ namespace Elton.Aqara
             {
                 foreach (var gateway in config.Gateways)
                 {
-                    if (dicGateways.ContainsKey(gateway.GatewayMacAddress))
+                    if (dicGateways.ContainsKey(gateway.MacAddress))
                         continue;
 
-                    AqaraGateway entry = new AqaraGateway(gateway.GatewayMacAddress, gateway.Password, gateway.Devices);
+                    var sid = gateway.MacAddress.Replace(":", "").ToLower();
+                    AqaraGateway entry = new AqaraGateway(sid, gateway.Password, gateway.Devices);
                     dicGateways.Add(entry.Id, entry);
                 }
             }
@@ -113,10 +113,11 @@ namespace Elton.Aqara
                     UdpReceiveResult result = client.ReceiveAsync().Result;
                     Byte[] data = result.Buffer;
                     DateTime timestamp = DateTime.Now;
+                    var remoteAddress = result.RemoteEndPoint.Address.ToString();
 
                     string jsonString = Encoding.UTF8.GetString(data);
-                    log.DebugFormat("Received: {0}", jsonString);
-                    ProcessMessage(jsonString, timestamp);
+                    log.Debug($"Received: {jsonString}");
+                    ProcessMessage(remoteAddress, jsonString, timestamp);
                 }
                 catch(Exception ex)
                 {
@@ -147,5 +148,7 @@ namespace Elton.Aqara
             string jsonString = JsonConvert.SerializeObject(message);
             this.SendCommand(gateway, jsonString);
         }
+
+        public Dictionary<string, AqaraGateway> Gateways => dicGateways;
     }
 }

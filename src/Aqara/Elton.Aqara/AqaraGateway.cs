@@ -12,7 +12,7 @@ namespace Elton.Aqara
     /// </summary>
     public class AqaraGateway
     {
-        static readonly Common.Logging.ILog log = Common.Logging.LogManager.GetLogger(typeof(AqaraClient));
+        static readonly Common.Logging.ILog log = Common.Logging.LogManager.GetLogger(typeof(AqaraGateway));
 
         const int REMOTE_PORT = 9898;
 
@@ -20,7 +20,8 @@ namespace Elton.Aqara
         readonly string password = null;
         IPEndPoint endpoint = null;
         string token = null;
-        int latestTimestamp = -1;
+        DateTime latestTimestamp = DateTime.MinValue;
+        readonly Dictionary<string, AqaraDevice> dicDevices = new Dictionary<string, AqaraDevice>(StringComparer.OrdinalIgnoreCase);
         /// <summary>
         /// 从配置中载入的设备信息，key为device.sid。
         /// </summary>
@@ -82,7 +83,7 @@ namespace Elton.Aqara
         public void UpdateToken(string token)
         {
             this.token = token;
-            latestTimestamp = Environment.TickCount;
+            latestTimestamp = DateTime.Now;
         }
 
         public void Update(string remoteIp, string token)
@@ -121,10 +122,12 @@ namespace Elton.Aqara
             get { return token; }
         }
 
-        public int LatestTimestamp
+        public DateTime LatestTimestamp
         {
             get { return latestTimestamp; }
         }
+
+        public Dictionary<string, AqaraDevice> Devices => dicDevices;
 
         public override string ToString()
         {

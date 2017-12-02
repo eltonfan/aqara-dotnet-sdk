@@ -23,7 +23,7 @@ namespace Elton.Aqara
         /// 网关的Mac地址
         /// </summary>
         [JsonProperty("mac")]
-        public string GatewayMacAddress { get; set; }
+        public string MacAddress { get; set; }
         [JsonProperty("password")]
         public string Password { get; set; }
         [JsonProperty("devices")]

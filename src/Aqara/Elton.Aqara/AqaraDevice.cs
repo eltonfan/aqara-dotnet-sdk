@@ -13,8 +13,9 @@ namespace Elton.Aqara
 
         readonly Dictionary<string, DeviceState> dicStates = new Dictionary<string, DeviceState>(StringComparer.OrdinalIgnoreCase);
 
+        DateTime latestTimestamp = DateTime.MinValue;
         public string Id { get; private set; }
-        public long ShortId { get; private set; }
+        public UInt16 ShortId { get; private set; }
         public AqaraDevice(AqaraClient connector, AqaraGateway gateway, string sid)
         {
             this.connector = connector;
@@ -56,7 +57,11 @@ namespace Elton.Aqara
         public void Update(string modelName, long short_id)
         {
             this.modelName = modelName;
-            ShortId = short_id;
+            if (short_id > UInt16.MaxValue)
+                throw new ArgumentOutOfRangeException("short_id 值比 UInt16 大。");
+            ShortId = (UInt16)short_id;
+
+            latestTimestamp = DateTime.Now;
         }
 
         public AqaraGateway Gateway
@@ -70,6 +75,11 @@ namespace Elton.Aqara
         public Dictionary<string, DeviceState> States
         {
             get { return dicStates; }
+        }
+
+        public DateTime LatestTimestamp
+        {
+            get { return latestTimestamp; }
         }
     }
 }
