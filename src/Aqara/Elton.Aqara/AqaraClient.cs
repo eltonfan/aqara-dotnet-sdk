@@ -29,7 +29,7 @@ namespace Elton.Aqara
                         continue;
 
                     var sid = gateway.MacAddress.Replace(":", "").ToLower();
-                    AqaraGateway entry = new AqaraGateway(sid, gateway.Password, gateway.Devices);
+                    AqaraGateway entry = new AqaraGateway(this, sid, gateway.Password, gateway.Devices);
                     dicGateways.Add(entry.Id, entry);
                 }
             }

@@ -11,8 +11,8 @@ namespace Elton.Aqara
     /// </summary>
     public class PlugDevice : AqaraDevice
     {
-        public PlugDevice(AqaraClient connector, AqaraGateway gateway, string sid)
-            : base(connector, gateway, sid)
+        public PlugDevice(AqaraClient connector, AqaraGateway gateway, string sid, AqaraDeviceConfig config)
+            : base(connector, gateway, sid, config)
         {
         }
         

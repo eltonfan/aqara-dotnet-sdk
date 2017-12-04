@@ -16,18 +16,16 @@ namespace Elton.Aqara
 
         const int REMOTE_PORT = 9898;
 
+        readonly AqaraClient client = null;
         readonly string sid = null;
         readonly string password = null;
         IPEndPoint endpoint = null;
         string token = null;
         DateTime latestTimestamp = DateTime.MinValue;
         readonly Dictionary<string, AqaraDevice> dicDevices = new Dictionary<string, AqaraDevice>(StringComparer.OrdinalIgnoreCase);
-        /// <summary>
-        /// 从配置中载入的设备信息，key为device.sid。
-        /// </summary>
-        readonly Dictionary<string, AqaraDeviceConfig> dicDeviceInformations = new Dictionary<string, AqaraDeviceConfig>(StringComparer.OrdinalIgnoreCase);
-        public AqaraGateway(string sid, string password, AqaraDeviceConfig[] devices)
+        public AqaraGateway(AqaraClient client, string sid, string password, AqaraDeviceConfig[] devices)
         {
+            this.client = client;
             this.sid = sid;
             this.password = password;
             if(devices != null)
@@ -38,10 +36,12 @@ namespace Elton.Aqara
                     if (systemid.StartsWith("lumi.", StringComparison.OrdinalIgnoreCase))
                         systemid = systemid.Substring(5);
 
-                    if (dicDeviceInformations.ContainsKey(systemid))
-                        dicDeviceInformations[systemid] = item;
-                    else
-                        dicDeviceInformations.Add(systemid, item);
+                    if (dicDevices.ContainsKey(systemid))
+                        throw new ArgumentException("设备清单中已存在具有相同键的元素");
+
+                    var device = new AqaraDevice(client, this, systemid, item);
+                    device.Name = item.Name;
+                    dicDevices.Add(systemid, device);
                 }
             }
         }
@@ -90,13 +90,6 @@ namespace Elton.Aqara
         {
             UpdateEndPoint(remoteIp, null);
             UpdateToken(token);
-        }
-
-        public AqaraDeviceConfig GetDeviceInformation(string sid)
-        {
-            if (!dicDeviceInformations.ContainsKey(sid))
-                return null;
-            return dicDeviceInformations[sid];
         }
 
         public string Id

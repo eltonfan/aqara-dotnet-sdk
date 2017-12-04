@@ -81,7 +81,7 @@ namespace Elton.Aqara
                 
                 if(!gateway.Devices.ContainsKey(deviceId))
                 {
-                    AqaraDevice device = new AqaraDevice(this, gateway, sid);
+                    AqaraDevice device = new AqaraDevice(this, gateway, sid, null);
                     gateway.Devices.Add(deviceId, device);
 
                     log.Info($"GATEWAY[{device.Gateway.Id}] device added: sid='{device.Id}'.");
@@ -123,18 +123,35 @@ namespace Elton.Aqara
             }
             else
             {//子设备心跳
-                if (!gateway.Devices.ContainsKey(sid))
-                    return;
-                var device = gateway.Devices[sid];
-                device.Update(model, short_id);
-                dynamic data = JsonConvert.DeserializeObject(jsonString);
-                foreach (var item in data)
-                {
-                    string key = item.Name;
-                    string value = item.Value;
-                }
+                UpdateDeviceHeartbeatReceived(gateway, sid, model, short_id, jsonString);
             }
         }
+
+        void UpdateDeviceData(AqaraGateway gateway, string sid, string model, long shortId, string jsonString)
+        {
+            if (!gateway.Devices.ContainsKey(sid))
+                return;
+            var device = gateway.Devices[sid];
+            device.Update(model, shortId);
+            device.UpdateData(jsonString);
+
+            if (DeviceStateChanged != null)
+                DeviceStateChanged(device, EventArgs.Empty);
+        }
+        void UpdateDeviceHeartbeatReceived(AqaraGateway gateway, string sid, string model, long shortId, string jsonString)
+        {
+            if (!gateway.Devices.ContainsKey(sid))
+                return;
+            var device = gateway.Devices[sid];
+            device.Update(model, shortId);
+            device.UpdateData(jsonString);
+
+            if (HeartbeatReceived != null)
+                HeartbeatReceived(device, EventArgs.Empty);
+        }
+
+        public event EventHandler DeviceStateChanged;
+        public event EventHandler HeartbeatReceived;
 
         void ProcessMessage_Report(AqaraGateway gateway, dynamic message, DateTime timestamp)
         {
@@ -147,23 +164,7 @@ namespace Elton.Aqara
             string token = message.token;
             string jsonString = message.data;
 
-            if (!gateway.Devices.ContainsKey(sid))
-                return;
-            var device = gateway.Devices[sid];
-            device.Update(model, short_id);
-
-            dynamic data = JsonConvert.DeserializeObject(jsonString);
-            foreach (var item in data)
-            {
-                string key = item.Name;
-                string value = item.Value;
-
-                if(!device.States.ContainsKey(key))
-                    device.States.Add(key, new DeviceState(key));
-
-                var state = device.States[key];
-                state.SetValue(value);
-            }
+            UpdateDeviceData(gateway, sid, model, short_id, jsonString);
         }
 
         void ProcessMessage_ReadAck(AqaraGateway gateway, dynamic message, DateTime timestamp)
@@ -195,7 +196,7 @@ namespace Elton.Aqara
                 case "plug"://智能插座
                     if (!(device is PlugDevice))
                     {
-                        device = new PlugDevice(this, device.Gateway, device.Id);
+                        device = new PlugDevice(this, device.Gateway, device.Id, device.Config);
                         gateway.Devices[deviceId] = device;
                         device.Update(model, short_id);
                     }
@@ -205,7 +206,7 @@ namespace Elton.Aqara
                 case "ctrl_neutral2"://单火开关双键
                     if (!(device is CtrlNeutral2Device))
                     {
-                        device = new CtrlNeutral2Device(this, device.Gateway, device.Id);
+                        device = new CtrlNeutral2Device(this, device.Gateway, device.Id, device.Config);
                         gateway.Devices[deviceId] = device;
                         device.Update(model, short_id);
                     }
