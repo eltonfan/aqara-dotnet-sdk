@@ -25,7 +25,7 @@ namespace Elton.Aqara
             {
                 foreach (var gateway in config.Gateways)
                 {
-                    if (dicGateways.ContainsKey(gateway.MacAddress))
+                    if (gateway?.MacAddress == null || dicGateways.ContainsKey(gateway.MacAddress))
                         continue;
 
                     var sid = gateway.MacAddress.Replace(":", "").ToLower();
