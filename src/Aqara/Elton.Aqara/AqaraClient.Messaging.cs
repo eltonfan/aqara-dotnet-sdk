@@ -133,10 +133,13 @@ namespace Elton.Aqara
                 return;
             var device = gateway.Devices[sid];
             device.Update(model, shortId);
-            device.UpdateData(jsonString);
+            var listChanged = device.UpdateData(jsonString);
 
-            if (DeviceStateChanged != null)
-                DeviceStateChanged(device, EventArgs.Empty);
+            foreach (var args in listChanged)
+            {
+                if (DeviceStateChanged != null)
+                    DeviceStateChanged(device, args);
+            }
         }
         void UpdateDeviceHeartbeatReceived(AqaraGateway gateway, string sid, string model, long shortId, string jsonString)
         {
@@ -150,7 +153,7 @@ namespace Elton.Aqara
                 HeartbeatReceived(device, EventArgs.Empty);
         }
 
-        public event EventHandler DeviceStateChanged;
+        public event EventHandler<StateChangedEventArgs> DeviceStateChanged;
         public event EventHandler HeartbeatReceived;
 
         void ProcessMessage_Report(AqaraGateway gateway, dynamic message, DateTime timestamp)

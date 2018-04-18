@@ -53,25 +53,31 @@ namespace Elton.Aqara
             latestTimestamp = DateTime.Now;
         }
 
-        public void UpdateData(string jsonString)
+        public List<StateChangedEventArgs> UpdateData(string jsonString)
         {
+            var listChanged = new List<StateChangedEventArgs>();
+
             dynamic data = JsonConvert.DeserializeObject(jsonString);
             foreach (var item in data)
             {
-                string key = item.Name;
-                string value = item.Value;
+                string stateName = item.Name;
+                string stateData = item.Value;
 
-                if (!dicStates.ContainsKey(key))
-                    dicStates.Add(key, new DeviceState(key));
+                if (!dicStates.ContainsKey(stateName))
+                    dicStates.Add(stateName, new DeviceState(stateName));
 
-                var state = dicStates[key];
-                state.SetValue(value);
+                var state = dicStates[stateName];
+
+                listChanged.Add(new StateChangedEventArgs(this, stateName,
+                    oldData: state.IsUnknown ? null : state.Value,
+                    newData: stateData));
+
+                if (state.IsUnknown || state.Value != stateData)
+                    state.SetValue(stateData);
             }
-
             latestTimestamp = DateTime.Now;
 
-            if (StateChanged != null)
-                StateChanged(this, EventArgs.Empty);
+            return listChanged;
         }
 
         public AqaraGateway Gateway
@@ -93,7 +99,5 @@ namespace Elton.Aqara
         {
             get { return latestTimestamp; }
         }
-
-        public event EventHandler StateChanged;
     }
 }
