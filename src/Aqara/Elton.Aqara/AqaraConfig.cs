@@ -38,9 +38,9 @@ namespace Elton.Aqara
         {
             return JsonConvert.SerializeObject(this);
         }
-        public static AqaraConfig Parse(string json)
+        public static AqaraConfig Parse(string jsonString)
         {
-            return JsonConvert.DeserializeObject<AqaraConfig>(json);
+            return JsonConvert.DeserializeObject<AqaraConfig>(jsonString);
         }
     }
 }
