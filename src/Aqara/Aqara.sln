@@ -9,6 +9,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elton.Aqara.Win", "Elton.Aq
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elton.Aqara.Tests", "Elton.Aqara.Tests\Elton.Aqara.Tests.csproj", "{9DC661FB-E5FF-496A-9D4A-A4F5EC816708}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elton.AqaraCloud", "Elton.AqaraCloud\Elton.AqaraCloud.csproj", "{93B633C1-826F-444F-9D30-86C7F0CF796F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elton.AqaraCloud.Tests", "Elton.AqaraCloud.Tests\Elton.AqaraCloud.Tests.csproj", "{4D25318E-A8A7-4E7A-9001-731C4B00C0B8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elton.OAuth2", "..\..\..\OAuth2\src\OAuth2\Elton.OAuth2\Elton.OAuth2.csproj", "{C1B4EDFB-2BA6-41FF-8134-E329A2418AA4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Elton.OAuth2.Tests", "..\..\..\OAuth2\src\OAuth2\Elton.OAuth2.Tests\Elton.OAuth2.Tests.csproj", "{06C8FB31-BA58-4CE8-A311-7B99C7AA050C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +35,22 @@ Global
 		{9DC661FB-E5FF-496A-9D4A-A4F5EC816708}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DC661FB-E5FF-496A-9D4A-A4F5EC816708}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DC661FB-E5FF-496A-9D4A-A4F5EC816708}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93B633C1-826F-444F-9D30-86C7F0CF796F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93B633C1-826F-444F-9D30-86C7F0CF796F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93B633C1-826F-444F-9D30-86C7F0CF796F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93B633C1-826F-444F-9D30-86C7F0CF796F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D25318E-A8A7-4E7A-9001-731C4B00C0B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D25318E-A8A7-4E7A-9001-731C4B00C0B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D25318E-A8A7-4E7A-9001-731C4B00C0B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D25318E-A8A7-4E7A-9001-731C4B00C0B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1B4EDFB-2BA6-41FF-8134-E329A2418AA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1B4EDFB-2BA6-41FF-8134-E329A2418AA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1B4EDFB-2BA6-41FF-8134-E329A2418AA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1B4EDFB-2BA6-41FF-8134-E329A2418AA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06C8FB31-BA58-4CE8-A311-7B99C7AA050C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06C8FB31-BA58-4CE8-A311-7B99C7AA050C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06C8FB31-BA58-4CE8-A311-7B99C7AA050C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06C8FB31-BA58-4CE8-A311-7B99C7AA050C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
