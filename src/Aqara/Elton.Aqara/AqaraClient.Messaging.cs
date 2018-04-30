@@ -195,6 +195,12 @@ namespace Elton.Aqara
                 case "motion"://人体传感器
                     break;
                 case "switch"://无线开关传感器
+                    if (!(device is SwitchDevice))
+                    {
+                        device = new SwitchDevice(this, device.Gateway, device.Id, device.Config);
+                        gateway.Devices[deviceId] = device;
+                        device.Update(model, short_id);
+                    }
                     break;
                 case "plug"://智能插座
                     if (!(device is PlugDevice))

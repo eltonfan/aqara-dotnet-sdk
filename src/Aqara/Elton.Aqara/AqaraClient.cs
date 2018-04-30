@@ -130,19 +130,33 @@ namespace Elton.Aqara
             client.Dispose();
         }
 
-        public void SendWriteCommand(AqaraDevice device, Dictionary<string, string> arguments)
+        public void SendWriteCommand(string sid, IEnumerable<KeyValuePair<string, string>> arguments = null)
+        {
+            var gateway = dicGateways.Values.SingleOrDefault(p => p.Devices.ContainsKey(sid));
+            if (gateway == null)
+                throw new KeyNotFoundException();
+
+            SendWriteCommand(gateway.Devices[sid], arguments);
+        }
+
+        public void SendWriteCommand(AqaraDevice device, IEnumerable<KeyValuePair<string, string>> arguments = null)
         {
             AqaraGateway gateway = device.Gateway;
 
-            arguments.Add("key", Encrypt(gateway.Password, gateway.Token));
-            string dataString = JsonConvert.SerializeObject(arguments);
+            var dicData = new Dictionary<string, string>();
+            if (arguments != null)
+            {
+                foreach (var pair in arguments)
+                    dicData.Add(pair.Key, pair.Value);
+            }
+            dicData.Add("key", Encrypt(gateway.Password, gateway.Token));
 
             dynamic message = new {
                 cmd = "write",
                 model = device.Model?.Name,
                 sid = device.Id,
                 short_id = device.ShortId,
-                data = dataString,
+                data = JsonConvert.SerializeObject(dicData),
             };
 
             string jsonString = JsonConvert.SerializeObject(message);
