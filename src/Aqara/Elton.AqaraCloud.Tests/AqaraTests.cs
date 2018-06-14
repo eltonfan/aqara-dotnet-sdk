@@ -51,8 +51,9 @@ namespace Elton.AqaraCloud.Tests
 
         void StartHttpListener()
         {
+            var uriPrefix = new Uri(config.RedirectUri).GetLeftPart(UriPartial.Authority) + "/";
             httpListener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
-            httpListener.Prefixes.Add("http://localhost:6060/");
+            httpListener.Prefixes.Add(uriPrefix);
             httpListener.Start();
             new Thread(new ThreadStart(delegate
             {
